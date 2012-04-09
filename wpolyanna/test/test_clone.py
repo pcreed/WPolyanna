@@ -37,12 +37,36 @@ class TestClone(unittest.TestCase):
         self.assertNotEqual(self.clone[0],self.f)
         self.assertNotEqual(self.clone[4],Projection(2,5,1))
 
+    def test_eq(self):
+        self.assertEqual(self.clone,
+                         Clone([Projection(2,5,0),
+                                Projection(2,5,1),
+                                self.h,self.f,self.g]))
+        self.assertNotEqual(self.clone,
+                            Clone([Projection(2,5,0),
+                                   Projection(2,5,1),
+                                   self.h,self.f,self.f]))
+        self.assertNotEqual(Clone([Projection(2,5,0),
+                                   Projection(2,5,1),
+                                   self.h,self.f,self.f]),
+                            self.clone)
+                         
+    def test_index(self):
+        self.assertEqual(self.clone.index(Projection(2,5,0)),0)
+        self.assertEqual(self.clone.index(Projection(2,5,1)),1)
+        self.assertEqual(self.clone.index(self.f),2)
+        self.assertEqual(self.clone.index(self.g),3)
+        self.assertEqual(self.clone.index(self.h),4)
+        
     def test_len(self):
         self.assertEqual(len(self.clone),5)
 
     def test_generate(self):
         clone = Clone.generate([self.f],2)
         self.assertEqual(clone,self.clone)
+
+    def test_repr(self):
+        self.assertEqual(self.clone,eval(repr(self.clone)))
         
 def suite():
 
