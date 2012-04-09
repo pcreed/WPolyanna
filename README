@@ -1,0 +1,7 @@
+# Copyright Paidi Creed (paidi.work@gmail.com), 2012
+
+WPolyanna is a python library for reasoning about weighted clones.
+It uses the libraries CDD and PuLP for polytope and linear 
+programming computations, respectively
+
+See the examples directory for examples
