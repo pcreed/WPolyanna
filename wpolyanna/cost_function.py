@@ -138,7 +138,8 @@ class CostFunction:
                     if row[i+1] != 0:
                         trivial = False
                 if not row in ineqs and not trivial:
-                    ineqs.append(row)
+                    ineqs.append(row)     
+
         return ineqs
 
     def wop_ineq(self,arity,clone=None):

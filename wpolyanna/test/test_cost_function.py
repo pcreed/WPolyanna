@@ -1,13 +1,5 @@
 import unittest
 
-#import wpolyanna.cost_function
-#from wpolyanna.cost_function import CostFunction
-#import wpolyanna.exception
-#from wpolyanna.exception import *
-#from wpolyanna.op import Projection, ExplicitOperation
-#import wpolyanna.wop
-#from wpolyanna.wop import WeightedOperation
-
 from wpolyanna import CostFunction
 from wpolyanna import Projection
 from wpolyanna import ExplicitOperation
@@ -62,7 +54,7 @@ class TestCostFunction(unittest.TestCase):
         
     def test_wpol_ineq(self):
         self.assertEqual(self.unary[0].wpol_ineq(1),[[0,1,1,0,0],[0,0,1,1,0]])
-        self.assertEqual(self.unary[1].wpol_ineq(1),[[0,0,0,1,1],[0,1,0,0,1]])
+        self.assertEqual(self.unary[1].wpol_ineq(1),[[0,1,0,0,1],[0,0,0,1,1]])
 
     def test_wpol(self):
         self.assertEqual(self.unary[0].wpol(1),[WeightedOperation(1, 2,
