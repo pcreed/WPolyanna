@@ -30,4 +30,4 @@ setup(cmdclass = cmdclasses,
       author_email="paidi.work@gmail.com",
       packages=["wpolyanna"],
       package_dir={"wpolyanna":"wpolyanna"},      
-      requires=["cdd","pulp","numpy"])
+      requires=["cdd","pulp"])
