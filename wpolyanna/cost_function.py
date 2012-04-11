@@ -101,15 +101,44 @@ class CostFunction:
         # variable for each of these
         N = len(clone)
         ineqs = []
-        
+
+        # Divide the tuples into sets of zero and non-zero cost 
         r = self.arity
         D = range(self.dom)
-        for X in it.product(it.product(D,repeat=r),repeat=arity):
-            row = [0 for _ in range(N+1)]
-            for i in xrange(0,N):
-                row[i+1] = self[clone[i].apply_to_tableau(X)]            
-            if not row in ineqs and max([row[i] != row[0] for i in range(1,N)]):
-                ineqs.append(row)        
+        T = [[],[]]
+        neg,pos = False,False
+        for t in it.product(D,repeat=r):
+            if self[t] == 0:
+                T[0].append(t)
+            else:
+                T[1].append(t)
+                if self[t] > 0:
+                    pos = True
+                elif self[t] < 0:
+                    neg = True
+        
+        # Tableaus containing at least one non-zero tuple
+        for comb in it.product([0,1],repeat=arity):
+            if sum(comb) > 0:
+                for X in it.product(*[T[i] for i in comb]):
+                    row = [0 for _ in range(N+1)]   
+                    for i in xrange(0,N):
+                        row[i+1] = self[clone[i].apply_to_tableau(X)]
+                    if not row in ineqs:
+                        ineqs.append(row)
+
+        # We only need tableaus with all zero tuples if there are some
+        # positive weighted tuples
+        if pos:
+            for X in it.product(T[0],repeat=arity):
+                row = [0 for _ in range(N+1)]
+                trivial = True
+                for i in xrange(0,N):
+                    row[i+1] = self[clone[i].apply_to_tableau(X)]
+                    if row[i+1] != 0:
+                        trivial = False
+                if not row in ineqs and not trivial:
+                    ineqs.append(row)
         return ineqs
 
     def wop_ineq(self,arity,clone=None):
@@ -183,7 +212,7 @@ class CostFunction:
                                                      weights))
         return W
 
-    def separate(self,other,arity,clone=None):
+    def wpol_separate(self,other,arity,clone=None):
         """ Test if other cannot be expressed over this cost function.
 
         :param other: the other cost function
@@ -195,9 +224,36 @@ class CostFunction:
         A = self.wop.ineqs(arity,clone)
         A += self.wpol_ineqs(arity,clone)
 
-        for e in other.wpol_ineqs(arity,clone):
+        # For each wpol inequality of other, check if there
+        # exists a wpol of this wop violating it
+        for c in other.wpol_ineqs(arity,clone):
+
+            prob = pulp.LpProblem()
+
+            # One variable for each operation in the clone
+            y = pulp.LpVariable.dicts("y",xrange(N))
+
+            # Must satisfy all inequalities in A
+            for a in A:
+                prob += sum(y[i]*a[i+1] for i in xrange(N)) >= 0
+
+            # Must violate c
+            prob += sum(y[i]*c[i+1] for i in range(N)) <= 1
+
+            prob.solve()
+
+            if pulp.LpStatus[prob.status] == 'Optimal':
+                op = []
+                w = []
+                for i in xrange(N):
+                    yval = round(pulp.value(y[i]),self.dom)
+                    if yval != 0:
+                        op.append(clone[i])
+                        w.append(yval)
+                return WeightedOperation(self.dom,arity,op,w)
             
-        
+        # Return false if we couldn't find a separating wop
+        return False
         
 # Global functions
 def wpol(cost_functions,arity,clone=None,multimorphisms=False):
