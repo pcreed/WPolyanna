@@ -102,14 +102,25 @@ class CostFunction:
         N = len(clone)
         ineqs = []
         
+        # Divide the tuples into sets of zero and non-zero cost 
         r = self.arity
         D = range(self.dom)
-        for X in it.product(it.product(D,repeat=r),repeat=arity):
-            row = [0 for _ in range(N+1)]
-            for i in xrange(0,N):
-                row[i+1] = self[clone[i].apply_to_tableau(X)]            
-            if not row in ineqs and max([row[i] != row[0] for i in range(1,N)]):
-                ineqs.append(row)        
+        T = [[],[]]
+        for t in it.product(D,repeat=r):
+            if self[t] == 0:
+                T[0].append(t)
+            else:
+                T[1].append(t)
+        
+        # Each tableau must contain at least one non-zero tuple
+        for comb it.itertools([0,1],repeat=arity):
+            if sum(comb) > 0:
+                for X in it.product(*[T[i] for i in comb):
+                    row = [0 for _ in range(N+1)]   
+                    for i in xrange(0,N):
+                        row[i+1] = self[clone[i].apply_to_tableau(X)]            
+                    if not row in ineqs:
+                        ineqs.append(row)        
         return ineqs
 
     def wop_ineq(self,arity,clone=None):
