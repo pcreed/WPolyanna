@@ -63,6 +63,11 @@ class TestCostFunction(unittest.TestCase):
                          [-1.0, 1.0])])
         self.assertEqual(wpol(self.unary,1),[])
         self.assertEqual(wpol(self.unary,2),[self.sm])
+
+    def test_wpol_separate(self):
+        self.assertFalse(self.softimp.wpol_separate(self.unary,1))
+        self.assertFalse(self.softimp.wpol_separate(self.unary,2))
+        self.assertTrue(self.softimp.wpol_separate(self.unary,3))
         
 def suite():
 

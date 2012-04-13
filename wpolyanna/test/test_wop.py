@@ -80,9 +80,9 @@ class TestWeightedOperation(unittest.TestCase):
         self.assertEqual(set(bsm),set(self.sm.imp(2)))
     
     def test_improves(self):
-        self.assertEqual(self.sm.improves(self.cf1),[])
-        self.assertEqual(self.nsm.improves(self.cf1),[-1,0,1,0])
-        self.assertEqual(self.sm.improves(self.cf3),[1,-1,0,0,0,0,-1,1])
+        self.assertEqual(self.sm.improves(self.cf1),True)
+        self.assertEqual(self.nsm.improves(self.cf1),(False,[-1,0,1,0]))
+        self.assertEqual(self.sm.improves(self.cf3),(False,[1,-1,0,0,0,0,-1,1]))
     
     def test_translations(self):
         self.assertEqual(self.sm.translations(2),[[-1,-1,1,1]])

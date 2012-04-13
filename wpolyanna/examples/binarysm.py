@@ -170,5 +170,5 @@ def check_bsm_express(gamma,k):
         print "%s is not expressible over binary submodular" & str(gamma)
 	print str(result)
     else:
-        print "%s does not separate on arity %d" % (str(cf),k) 
+        print "%s does not separate on arity %d" % (str(gamma),k) 
     

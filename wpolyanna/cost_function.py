@@ -1,5 +1,6 @@
 import itertools as it
 import cdd
+import pulp
 
 from wpolyanna.exception import *
 import wpolyanna.wop
@@ -26,10 +27,8 @@ class CostFunction:
         self.dom = dom
         self.costs = costs
         self.hash = -1
-        
-    def __getitem__(self,x):
-        """Return the cost of a particular tuple. """
 
+    def check_input(self,x):
         # Error checking
         if len(x) != self.arity:
             raise ArityError(len(x),self.arity)
@@ -39,13 +38,16 @@ class CostFunction:
             elif d >= self.dom:
                 raise DomainError(d-self.dom)
             
+    def __getitem__(self,x):
+        """Return the cost of a particular tuple. """
+        self.check_input(x)
         return self.costs[x]
 
     def __eq__(self,other):
         """ Test for equality. """
         return (self.dom == other.dom
                 and self.arity == other.arity
-                and self.costs == other.costs)
+                and self.cost_tuple() == other.cost_tuple())
             
     def __ne__(self,other):
         """ Test for disequality. """
@@ -53,7 +55,7 @@ class CostFunction:
 
     def __hash__(self):
         if self.hash < 0:
-            self.hash = int(self.arity + self.dom + sum(self.costs.values()))
+            self.hash = int(self.arity + self.dom + sum(self.cost_tuple()))
         return self.hash
     
     def __repr__(self):
@@ -62,7 +64,7 @@ class CostFunction:
     def __str__(self):
         """Return a string representation of this cost function. """
         s = "%d %d\n" % (self.arity,self.dom)
-        pairs = zip(self.costs.keys(),self.costs.values())
+        pairs = [(x,self[x]) for x in it.product(range(self.dom),repeat=self.arity)] 
         for (t,c) in pairs:
             s += "%s %f\n" % (str(t),c)
         return s
@@ -213,34 +215,39 @@ class CostFunction:
                                                      weights))
         return W
 
-    def wpol_separate(self,other,arity,clone=None):
-        """ Test if other cannot be expressed over this cost function.
+    def wpol_separate(self,Gamma,arity,clone=None):
+        """ Test if this cost function can be expressed over a set of cost functions.
 
-        :param other: the other cost function
+        :param Gamma: the other cost functions
         :returns: A separating weighted polymorphism if it exists and
         false otherwise.
         """
         if clone is None:
-            clone = Clone.all_operations(self.dom,arity)
-        A = self.wop.ineqs(arity,clone)
-        A += self.wpol_ineqs(arity,clone)
+            clone = Clone.all_operations(arity,self.dom)
+        N = len(clone)
+        
+        A = self.wop_ineq(arity,clone)
+        for gamma in Gamma:
+            for a in gamma.wpol_ineq(arity,clone):
+                if not a in A:
+                    A.append(a)
 
-        # For each wpol inequality of other, check if there
-        # exists a wpol of this wop violating it
-        for c in other.wpol_ineqs(arity,clone):
+        # For each wpol inequality of this cost function, check if
+        # there exists a wpol of Gamma violating it
+        for c in self.wpol_ineq(arity,clone):
 
             prob = pulp.LpProblem()
-
+            
             # One variable for each operation in the clone
             y = pulp.LpVariable.dicts("y",xrange(N))
 
             # Must satisfy all inequalities in A
             for a in A:
-                prob += sum(y[i]*a[i+1] for i in xrange(N)) >= 0
+                prob += sum(y[i]*a[i+1] for i in xrange(N)) <= 0
 
             # Must violate c
-            prob += sum(y[i]*c[i+1] for i in range(N)) <= 1
-
+            prob += sum(y[i]*c[i+1] for i in range(N)) >= 1
+            
             prob.solve()
 
             if pulp.LpStatus[prob.status] == 'Optimal':
@@ -251,7 +258,7 @@ class CostFunction:
                     if yval != 0:
                         op.append(clone[i])
                         w.append(yval)
-                return WeightedOperation(self.dom,arity,op,w)
+                return wpolyanna.wop.WeightedOperation(arity,self.dom,op,w)
             
         # Return false if we couldn't find a separating wop
         return False

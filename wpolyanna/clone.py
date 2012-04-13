@@ -30,7 +30,7 @@ class Clone:
             self.ops = [Projection(self.dom,self.arity,i) for i in range(self.arity)]
         
     def __repr__(self):
-        return str(self.ops)
+        return "Clone(%s)" % str(self.ops)
     
     def __getitem__(self,i):
         """ Return the i-th operation in this clone. """

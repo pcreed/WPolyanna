@@ -232,8 +232,8 @@ class WeightedOperation:
             tuples.append(x)
         for e in self.imp_ineq(r):
             if sum(cf[tuples[i]]*e[i] for i in range(len(e)) if e[i] != 0) > 0:
-                return e
-        return []
+                return False,e
+        return True
     
     def translations(self,arity,clone=None):
         """ Return the set of translations by elements of a clone.
