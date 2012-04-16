@@ -10,10 +10,10 @@ First install Pulp (http://code.google.com/p/pulp-or/) and pycddlib (http://pypi
 
 Run
 
+python setup.py install
+
+Then run
+
 python setup.py test
 
 to make sure everything is working properly.
-
-Then run 
-
-python setup.py install
