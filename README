@@ -4,6 +4,8 @@ WPolyanna is a python library for reasoning about weighted clones.
 It uses the libraries CDD and PuLP for polytope and linear 
 programming computations, respectively.
 
+Currently using python2.7. A python3 version will be forthcoming soon.
+
 First install Pulp (http://code.google.com/p/pulp-or/) and pycddlib (http://pypi.python.org/pypi/pycddlib).
 
 Run

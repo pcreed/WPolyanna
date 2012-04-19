@@ -71,7 +71,12 @@ class TestBinaryOperation(unittest.TestCase):
         self.assertEqual(self.f,eval(repr(self.f)))
         self.assertEqual(self.min,eval(repr(self.min)))
 
-        
+def suite():
+
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(TestBinaryOperation))
+    return suite
+
 if __name__ == '__main__':
 
     unittest.main()

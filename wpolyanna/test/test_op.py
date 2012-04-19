@@ -116,6 +116,13 @@ class TestOperation(unittest.TestCase):
     def test_repr(self):
         self.assertEqual(self.f,eval(repr(self.f)))
         
+def suite():
+
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(TestOperation))
+    suite.addTest(unittest.makeSuite(TestExplicitOperation))
+    suite.addTest(unittest.makeSuite(TestProjection))
+    return suite
         
 if __name__ == '__main__':
 
