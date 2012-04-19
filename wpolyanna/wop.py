@@ -2,6 +2,7 @@ import string, copy
 import itertools as it
 import cdd, pulp
 
+from wpolyanna.util import binary_search
 from wpolyanna.op import Operation
 from wpolyanna.clone import Clone
 import wpolyanna.cost_function
@@ -160,7 +161,12 @@ class WeightedOperation:
             #for i in range(len(Y)):
             #    row[index[Y[i]]] += self.weights[i]
             if max([i != 0 for i in row]):
-                A.append(row)
+                if len(A) == 0:
+                    A = [row]
+                else:
+                    i = binary_search(A,row)
+                    if i == len(A) or A[i] != row:
+                        A.insert(i,row)
         return A
     
     def imp(self,r,maxcsp=False):
@@ -268,13 +274,16 @@ class WeightedOperation:
                 try: 
                     row[index[f.compose(F)]] += w
                 except KeyError:
-                    print f
-                    print F[0]
-                    print F[1]
-                    print f.compose(F)
                     raise KeyError
-            if min(row) != 0 and not row in A:
-                A.append(row)
+            # Add non-zero rows if they are are not already in A.
+            # We keep A sorted to make this check more efficient
+            if min(row) != 0:
+                if len(A) == 0:
+                    A = [row]
+                else:
+                    i = binary_search(A,row)
+                    if i == len(A) or A[i] != row:
+                        A.insert(i,row)
         return A
     
     def in_wclone(self,other,clone=None):

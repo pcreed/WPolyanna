@@ -53,8 +53,8 @@ class TestCostFunction(unittest.TestCase):
                           [0,1,1,1,1],[0,-1,-1,-1,-1]])
         
     def test_wpol_ineq(self):
-        self.assertEqual(self.unary[0].wpol_ineq(1),[[0,1,1,0,0],[0,0,1,1,0]])
-        self.assertEqual(self.unary[1].wpol_ineq(1),[[0,1,0,0,1],[0,0,0,1,1]])
+        self.assertEqual(self.unary[0].wpol_ineq(1),[[0,0,1,1,0],[0,1,1,0,0]])
+        self.assertEqual(self.unary[1].wpol_ineq(1),[[0,0,0,1,1],[0,1,0,0,1]])
 
     def test_wpol(self):
         self.assertEqual(self.unary[0].wpol(1),[WeightedOperation(1, 2,

@@ -52,7 +52,7 @@ class TestWeightedOperation(unittest.TestCase):
     def test_imp_ineq(self):
         self.assertEqual(self.sm.imp_ineq(2),[[1,-1,-1,1]])
         self.assertEqual(self.sm.imp_ineq(3),
-                         [[1,-1,-1,1,0,0,0,0],
+                         sorted([[1,-1,-1,1,0,0,0,0],
                          [1,-1,0,0,-1,1,0,0],
                          [1,-1,0,0,0,0,-1,1],
                          [1,0,-1,0,-1,0,1,0],
@@ -60,14 +60,14 @@ class TestWeightedOperation(unittest.TestCase):
                          [1,0,0,-1,-1,0,0,1],
                          [0,1,0,-1,0,-1,0,1],
                          [0,0,1,-1,0,0,-1,1],
-                         [0,0,0,0,1,-1,-1,1]])
+                         [0,0,0,0,1,-1,-1,1]]))
         self.assertEqual(self.nsm.imp_ineq(2),
-                         [[-1,1,0,0],
+                         sorted([[-1,1,0,0],
                          [-1,0,1,0],
                          [-1,0,0,1],
                          [1,-2,-2,3],
                          [0,-1,0,1],
-                         [0,0,-1,1]])
+                         [0,0,-1,1]]))
 
     def test_imp(self):
         bsm = []
@@ -81,8 +81,8 @@ class TestWeightedOperation(unittest.TestCase):
     
     def test_improves(self):
         self.assertEqual(self.sm.improves(self.cf1),True)
-        self.assertEqual(self.nsm.improves(self.cf1),(False,[-1,0,1,0]))
-        self.assertEqual(self.sm.improves(self.cf3),(False,[1,-1,0,0,0,0,-1,1]))
+        self.assertEqual(self.nsm.improves(self.cf1),(False,[-1,0,0,1]))
+        self.assertEqual(self.sm.improves(self.cf3),(False,[0,0,0,0,1,-1,-1,1]))
     
     def test_translations(self):
         self.assertEqual(self.sm.translations(2),[[-1,-1,1,1]])

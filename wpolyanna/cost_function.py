@@ -5,6 +5,7 @@ import pulp
 from wpolyanna.exception import *
 import wpolyanna.wop
 from wpolyanna.clone import Clone
+from wpolyanna.util import binary_search
 
 class CostFunction:
     """ A class representing cost functions. 
@@ -102,7 +103,7 @@ class CostFunction:
         # N is the number of operations in the clone. We will need a
         # variable for each of these
         N = len(clone)
-        ineqs = []
+        A = []
 
         # Divide the tuples into sets of zero and non-zero cost 
         r = self.arity
@@ -126,8 +127,14 @@ class CostFunction:
                     row = [0 for _ in range(N+1)]   
                     for i in xrange(0,N):
                         row[i+1] = self[clone[i].apply_to_tableau(X)]
-                    if not row in ineqs:
-                        ineqs.append(row)
+                    # Insert row if not already in A
+                    # We keep A sorted to make this check more efficient
+                    if len(A) == 0:
+                        A = [row]
+                    else:
+                        i = binary_search(A,row)
+                        if i == len(A) or A[i] != row:
+                            A.insert(i,row)
 
         # We only need tableaus with all zero tuples if there are some
         # positive weighted tuples
@@ -139,10 +146,14 @@ class CostFunction:
                     row[i+1] = self[clone[i].apply_to_tableau(X)]
                     if row[i+1] != 0:
                         trivial = False
-                if not row in ineqs and not trivial:
-                    ineqs.append(row)     
-
-        return ineqs
+                if not trivial:
+                    if len(A) == 0:
+                        A = [row]
+                    else:
+                        i = binary_search(A,row)
+                        if i == len(A) or A[i] != row:
+                            A.insert(i,row)
+        return A
 
     def wop_ineq(self,arity,clone=None):
         """ Returns the set of inequalities defining a weighted operation.
@@ -152,18 +163,18 @@ class CostFunction:
             N = self.dom**(self.dom**arity)
         else:
             N = len(clone)
-        ineqs = []
+        A = []
         # All non-projections are non-negative
         for i in xrange(arity,N):
             row = [0 for _ in range(N+1)]
             row[i+1] = -1
-            ineqs.append(row)
+            A.append(row)
 
         # All weights sum to 0
-        ineqs.append([0] + [1 for _ in range(N)])
-        ineqs.append([0] + [-1 for _ in range(N)])
+        A.append([0] + [1 for _ in range(N)])
+        A.append([0] + [-1 for _ in range(N)])
 
-        return ineqs
+        return A
     
     def wpol(self,arity,clone=None,multimorphisms=False):
         """ Return the weighted polymorphisms.
@@ -191,14 +202,14 @@ class CostFunction:
         if clone is None:
             clone = Clone.all_operations(arity,self.dom)
         N = len(clone)
-        ineqs = self.wop_ineq(arity,clone)
+        A = self.wop_ineq(arity,clone)
         
         # Get the weighted polymorphism inequalities
         for row in self.wpol_ineq(arity,clone):
-            if not row in ineqs:
-                ineqs.append(row)
+            if not row in A:
+                A.append(row)
 
-        poly = cdd.Polyhedron(cdd.Matrix(ineqs))
+        poly = cdd.Polyhedron(cdd.Matrix(A))
         ray_mat = poly.get_generators()
         W = []
         for i in range(ray_mat.row_size):
