@@ -52,11 +52,11 @@ class TestClone(unittest.TestCase):
                             self.clone)
                          
     def test_index(self):
-        self.assertEqual(self.clone.index(Projection(2,5,0)),0)
-        self.assertEqual(self.clone.index(Projection(2,5,1)),1)
-        self.assertEqual(self.clone.index(self.f),2)
-        self.assertEqual(self.clone.index(self.g),3)
-        self.assertEqual(self.clone.index(self.h),4)
+        self.assertEqual(self.clone.get_index(Projection(2,5,0)),0)
+        self.assertEqual(self.clone.get_index(Projection(2,5,1)),1)
+        self.assertEqual(self.clone.get_index(self.f),2)
+        self.assertEqual(self.clone.get_index(self.g),3)
+        self.assertEqual(self.clone.get_index(self.h),4)
         
     def test_len(self):
         self.assertEqual(len(self.clone),5)

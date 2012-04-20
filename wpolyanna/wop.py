@@ -241,6 +241,34 @@ class WeightedOperation:
                 return False,e
         return True
     
+    def translate(self,F,clone=None):
+        """ Return the translation by a list of operations.
+        
+        :param F: the list of operations to translate by
+        :param clone: the clone within which the translation is taking place
+
+        :returns: the translation
+        """
+        if len(F) != self.arity:
+            raise ArityError(self.arity,len(F))
+        k = F[0].arity
+        
+        if clone is None:
+            clone = Clone.generate(self.ops + F,k)
+        
+        if k != clone[0].arity:
+            raise ArityError(k,clone[0].arity)
+        if clone[0].dom != self.dom:
+            raise DomainError(clone[0].dom)
+
+        row = [0 for _ in range(len(clone))]
+        for (f,w) in self.weight_iter():
+            try: 
+                row[clone.get_index(f.compose(F))] += w
+            except KeyError:
+                raise KeyError
+        return row
+
     def translations(self,arity,clone=None):
         """ Return the set of translations by elements of a clone.
 
@@ -258,13 +286,8 @@ class WeightedOperation:
 
         if clone is None:
             clone = Clone.generate(self.ops,arity)
-        
-        # Generate an index for the elements of the clone
         N = len(clone)
-        index = dict()
-        for i in range(N):
-            index[clone[i]] = i
-        
+
         # Each tuple of terms in the clone gives rise to a generator
         A = []
         for t in it.product(range(N),repeat=self.arity):
@@ -272,9 +295,10 @@ class WeightedOperation:
             row = [0 for _ in range(N)]
             for (f,w) in self.weight_iter():#zip(self.ops,self.weights):
                 try: 
-                    row[index[f.compose(F)]] += w
+                    row[clone.get_index(f.compose(F))] += w
                 except KeyError:
                     raise KeyError
+
             # Add non-zero rows if they are are not already in A.
             # We keep A sorted to make this check more efficient
             if min(row) != 0:
@@ -356,7 +380,7 @@ class WeightedOperation:
 
             for i in range(len(A)):
                 prob += (pulp.lpSum([A[i][j]*z[j] for j in range(N)]) <= 0, "")
-            prob += pulp.lpSum([w*z[clone.index(f)]
+            prob += pulp.lpSum([w*z[clone.get_index(f)]
                            for (f,w) in other.weight_iter()]) >= 1,""
             prob.solve()
             costs = dict()

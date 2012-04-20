@@ -1,7 +1,7 @@
 import unittest
 
 from wpolyanna import Projection
-from wpolyanna.sharp3 import *
+from wpolyanna.sharpternop import *
 
 class TestSharpTernary(unittest.TestCase):
     """

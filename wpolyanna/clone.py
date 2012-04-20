@@ -28,7 +28,12 @@ class Clone:
 
         if len(ops) == 0:
             self.ops = [Projection(self.dom,self.arity,i) for i in range(self.arity)]
-        
+        self.index = dict()
+        i = 0
+        for f in self.ops:
+            self.index[f] = i
+            i += 1
+
     def __repr__(self):
         return "Clone(%s)" % str(self.ops)
     
@@ -57,9 +62,9 @@ class Clone:
                 return False
         return True
 
-    def index(self,f):
+    def get_index(self,f):
         """ Return the index of a particular Operation in this clone. """
-        return self.ops.index(f)
+        return self.index[f]
 
     @staticmethod
     def all_operations(arity,dom):
